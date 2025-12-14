@@ -245,15 +245,14 @@
         </div>
       </div>
 
-      <div class="mt-4 flex flex-col sm:flex-row gap-3">
-        <button id="calcBtn" class="btn btn-primary h-11">요율 조회</button>
-        <button id="copyBtn" class="btn btn-ghost h-11">결과 복사</button>
-      </div>
-
-      <div class="mt-4 text-[11px] muted">
-        * 할증금액은 할증료만 백업인만 사사인? 적용 후 합산, 거리(km)는 소수점 첫째자리 사사인? 적용됩니다.<br/>
-        * 거리 550km 초과지역은 별도산정(데이터 기준).<br/>
-        * 본 서비스는 참고용 자료로만 사용되어야 하며 실제 운송 시 차이가 발생할 수 있습니다.(출처: 국토교통부고시 제2019-1007호)
+      
+      <div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div class="text-[12px] font-bold">안내사항</div>
+        <ul class="mt-2 space-y-1 text-[12px] text-slate-600 leading-relaxed">
+          <li>• 할증금액은 할증료만 백원미만 사사오입 적용 후 합산, 거리(km)는 소수점 첫째자리 사사오입 적용됩니다.</li>
+          <li>• 고시지역 외 구간은 텍스트 회색처리, 거리 550km 초과지역은 별도산출됩니다.</li>
+          <li>• 본 서비스는 화물자동차 안전운임에 근거한 운임으로 참고용 자료로만 사용되어야 하며, 실제 운송 시 차이가 발생할 수 있습니다.</li>
+        </ul>
       </div>
     </section>
 
@@ -823,6 +822,12 @@
     });
 
     // events
+    ['periodSelect','typeSelect'].forEach(function(id){
+      var el = $(id);
+      if(!el) return;
+      el.addEventListener('change', function(){ render(); });
+    });
+
     $('portSelect').addEventListener('change', function(){ populateSido(); render(); });
     $('useBjd').addEventListener('change', function(){ populateSido(); render(); });
     $('sidoSelect').addEventListener('change', function(){ populateSigungu(); render(); });
@@ -832,7 +837,7 @@
 
     $('addrSearchBtn') && $('addrSearchBtn').addEventListener('click', handleAddrSearch);
     $('addrResultsClose') && $('addrResultsClose').addEventListener('click', function(e){ e.preventDefault(); closeAddrResults(); });
-    $('calcBtn').addEventListener('click', render);
+    var __calcBtn=$('calcBtn'); if(__calcBtn) __calcBtn.addEventListener('click', render);
 
     // surcharge inputs re-render
     ['s_flexibag','s_tank','s_reefer','s_dump','s_rough','s_holiday','s_night','s_xray','s_dg','s_overweight_ton','s_oversize_cm'].forEach(function(id){
@@ -856,7 +861,7 @@
       });
     }
 
-    $('copyBtn').addEventListener('click', function(){
+    var __copyBtn=$('copyBtn'); if(__copyBtn) __copyBtn.addEventListener('click', function(){
       var txt = [
         'KBridge 안전운임제 계산 결과',
         '기간: '+($('periodSelect').value||'-'),
