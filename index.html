@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>KBridge 안전운임제 계산기 (완전 내장형)</title>
+  <title>케이브릿지 안전운임제 계산기 | 구간·행선지·할증 자동 계산</title>
+  <meta name="description" content="케이브릿지 안전운임제 계산기. 컨테이너 운송 구간, 행선지, 20FT·40FT 타입과 부대 할증 조건을 반영해 참고 운임을 확인하세요." />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
 
@@ -164,17 +165,238 @@
   .ell1{ max-width: 240px; }
 }
 
+
+/* === KBridge Express-style visual refresh: preserves all calculator IDs, data and logic === */
+:root{
+  --kb-blue:#0f4c81;
+  --kb-blue-2:#1565c0;
+  --kb-navy:#10243e;
+  --kb-sky:#eaf4ff;
+  --kb-mint:#e9fbf7;
+  --kb-orange:#ff8a3d;
+  --kb-gray:#667085;
+  --kb-line:#dbe4ef;
+  --kb-bg:#f5f8fc;
+  --kb-white:#ffffff;
+  --shadow:0 18px 45px rgba(16,36,62,.12);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0 !important;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif !important;
+  color:var(--kb-navy) !important;
+  background:var(--kb-bg) !important;
+  line-height:1.65 !important;
+}
+a{color:inherit;text-decoration:none;}
+.wrap{max-width:1180px !important;}
+.kb-page{max-width:1180px;margin:0 auto;padding:28px 18px 0;}
+.kb-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px;}
+.kb-brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:-.03em;color:var(--kb-navy);}
+.kb-brand-mark{width:42px;height:42px;display:grid;place-items:center;color:#fff;font-weight:900;background:linear-gradient(135deg,var(--kb-blue),#2f80ed);box-shadow:0 10px 25px rgba(15,76,129,.22);}
+.kb-brand-title{font-size:18px;}
+.kb-action-row{display:flex;gap:10px;align-items:center;}
+.kb-mini-btn{border:1px solid #c8d7e8;background:#fff;padding:10px 15px;font-size:14px;font-weight:800;cursor:pointer;color:#0b3f6f;box-shadow:0 8px 18px rgba(16,36,62,.05);transition:transform .18s ease,box-shadow .18s ease,background .18s ease;}
+.kb-mini-btn:hover{background:#f4f8fd;transform:translateY(-1px);}
+.kb-mini-btn.primary{border-color:rgba(15,76,129,.2);background:linear-gradient(135deg,#0b3f6f,#1565c0);color:#fff;box-shadow:0 12px 24px rgba(15,76,129,.22);}
+.kb-hero{position:relative;overflow:hidden;background:linear-gradient(135deg,#ffffff 0%,#eef7ff 52%,#e8f2ff 100%);border:1px solid var(--kb-line);box-shadow:var(--shadow);padding:44px;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(330px,.95fr);gap:30px;}
+.kb-hero:before{content:"";position:absolute;right:-90px;top:-90px;width:260px;height:260px;background:rgba(21,101,192,.12);border-radius:999px;}
+.kb-hero:after{content:"";position:absolute;right:160px;bottom:-130px;width:280px;height:280px;background:rgba(255,138,61,.10);border-radius:999px;}
+.kb-hero>*{position:relative;z-index:1;}
+.kb-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;background:#fff;border:1px solid var(--kb-line);color:var(--kb-blue);font-weight:900;font-size:13px;margin-bottom:18px;}
+.kb-hero h1{margin:0;font-size:clamp(25px,3.7vw,38px);line-height:1.22;letter-spacing:-.045em;color:var(--kb-navy);}
+.kb-hero-copy{margin:16px 0 0;color:#44546a;font-size:16px;max-width:650px;word-break:keep-all;}
+.kb-hero h1{font-size:clamp(21px,2.7vw,30px) !important;line-height:1.28 !important;}
+.kb-hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px;}
+.kb-trust-row{margin-top:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.kb-trust-card{background:rgba(255,255,255,.88);border:1px solid #d5e0ec;padding:15px;box-shadow:0 8px 18px rgba(16,36,62,.04);}
+.kb-trust-card strong{display:block;font-size:18px;letter-spacing:-.03em;}
+.kb-trust-card span{color:var(--kb-gray);font-size:13px;}
+.kb-visual-card{background:rgba(255,255,255,.86);border:1px solid var(--kb-line);padding:26px;display:grid;align-content:center;min-height:390px;}
+.kb-route-box{display:grid;gap:12px;}
+.kb-route-item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #d5e0ec;padding:15px;box-shadow:0 10px 20px rgba(16,36,62,.06);}
+.kb-icon{width:42px;height:42px;display:grid;place-items:center;background:var(--kb-sky);color:var(--kb-blue);font-size:22px;flex:0 0 auto;}
+.kb-route-item strong{display:block;letter-spacing:-.03em;font-size:15px;}
+.kb-route-item span{display:block;color:var(--kb-gray);font-size:12.5px;line-height:1.45;word-break:keep-all;}
+.kb-section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:26px;padding-bottom:16px;border-bottom:1px solid #edf2f7;}
+.kb-section-title h2{margin:0;font-size:clamp(22px,2.5vw,30px);letter-spacing:-.045em;line-height:1.28;color:var(--kb-navy);}
+.kb-section-title p{margin:8px 0 0;color:var(--kb-gray);word-break:keep-all;font-size:14px;}
+body>header{display:none !important;}
+main#calculator{padding-top:30px !important;padding-bottom:70px !important;}
+.card{background:linear-gradient(180deg,#ffffff 0%,#f9fcff 100%) !important;border:1px solid #d5e0ec !important;border-radius:0 !important;box-shadow:0 16px 38px rgba(16,36,62,.07) !important;}
+.label{font-size:13px !important;font-weight:900 !important;color:#334155 !important;margin-bottom:7px !important;}
+.input,input,select,textarea{border-radius:0 !important;border:1px solid #cdd8e6 !important;background:#fff !important;color:var(--kb-navy) !important;font-family:inherit !important;box-shadow:none !important;}
+.input{padding:10px 11px !important;font-size:14px !important;min-height:42px !important;}
+.input:focus,input:focus,select:focus,textarea:focus{border-color:var(--kb-blue-2) !important;box-shadow:0 0 0 3px rgba(21,101,192,.10) !important;outline:none !important;}
+.btn,.kb-btn{border-radius:0 !important;border:1px solid #c8d7e8 !important;background:#fff !important;color:#0b3f6f !important;font-weight:900 !important;box-shadow:0 8px 18px rgba(16,36,62,.05) !important;}
+.btn:hover,.kb-btn:hover{background:#f4f8fd !important;border-color:#9eb9d6 !important;transform:translateY(-1px);}
+.btn-primary,.kb-btn.primary{background:linear-gradient(135deg,#0b3f6f,#1565c0) !important;color:#fff !important;border-color:rgba(15,76,129,.18) !important;box-shadow:0 14px 28px rgba(15,76,129,.28) !important;}
+.btn-primary:hover,.kb-btn.primary:hover{background:linear-gradient(135deg,#092f54,#0f4c81) !important;box-shadow:0 18px 34px rgba(15,76,129,.34) !important;}
+.opt{border:1px solid #d5e0ec !important;border-radius:0 !important;background:linear-gradient(180deg,#ffffff,#f8fbff) !important;box-shadow:0 10px 24px rgba(16,36,62,.05) !important;padding:16px !important;}
+.kbadge{border-radius:0 !important;background:var(--kb-sky) !important;color:var(--kb-blue) !important;border:1px solid #c9dff5 !important;}
+.switch{border-radius:999px !important;background:#cbd5e1 !important;box-shadow:none !important;}
+.switch:checked{background:var(--kb-blue-2) !important;}
+.tab{border-radius:0 !important;background:#fff !important;border:1px solid #c8d7e8 !important;color:#0b3f6f !important;height:42px !important;box-shadow:0 8px 18px rgba(16,36,62,.04);}
+.tab.on{background:linear-gradient(135deg,#0b3f6f,#1565c0) !important;color:#fff !important;border-color:rgba(15,76,129,.18) !important;box-shadow:0 12px 24px rgba(15,76,129,.22) !important;}
+.muted{color:var(--kb-gray) !important;}
+.rhead{border-radius:0 !important;background:linear-gradient(135deg,var(--kb-navy),var(--kb-blue)) !important;color:#fff !important;border:0 !important;box-shadow:none !important;padding:16px 18px !important;}
+.vatBadge{border-radius:0 !important;background:rgba(255,255,255,.14) !important;color:#fff !important;border:1px solid rgba(255,255,255,.30) !important;}
+.sumgrid{gap:12px !important;}
+.sumcard{border-radius:0 !important;border:1px solid #d5e0ec !important;background:linear-gradient(180deg,#eef7ff,#ffffff) !important;box-shadow:0 10px 24px rgba(15,76,129,.06) !important;padding:18px 16px !important;}
+.sumcard .k{color:var(--kb-blue) !important;font-weight:900 !important;}
+.sumcard .v{color:var(--kb-navy) !important;font-size:21px !important;}
+.sumcard .s{color:var(--kb-gray) !important;}
+.metacard{border-radius:0 !important;border:1px solid #d5e0ec !important;box-shadow:0 10px 24px rgba(16,36,62,.04);}
+.metacard .hd{background:#f8fbff !important;color:#0b3f6f !important;border-bottom:1px solid #edf2f7 !important;padding:12px 14px !important;font-size:13px !important;}
+.metacard .bd{padding:14px !important;}
+.surChip{border-radius:0 !important;background:var(--kb-sky) !important;border:1px solid #c9dff5 !important;color:#0b3f6f !important;}
+.surChip b{color:var(--kb-blue) !important;}
+.calcNote,.calcWarn,.guideBox{border-radius:0 !important;background:linear-gradient(180deg,#eef7ff,#ffffff) !important;border:1px solid #c9dff5 !important;box-shadow:none !important;}
+.calcNote .t,.guideBox .guideTitle{color:var(--kb-blue) !important;}
+#addrResultsWrap{border-radius:0 !important;border-color:#d5e0ec !important;box-shadow:0 16px 38px rgba(16,36,62,.10) !important;}
+#addrResultsWrap>div:first-child{background:#f8fbff !important;border-bottom-color:#edf2f7 !important;}
+/* Visual card rows inside the calculator */
+.kb-mini-guide{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0 4px;}
+.kb-mini-guide-card{border:1px solid #d5e0ec;background:#fff;box-shadow:0 10px 24px rgba(16,36,62,.05);padding:16px;display:flex;gap:12px;align-items:flex-start;}
+.kb-mini-guide-card i{font-style:normal;width:36px;height:36px;display:grid;place-items:center;background:#eef7ff;color:#0f4c81;flex:0 0 auto;font-size:18px;}
+.kb-mini-guide-card strong{display:block;font-size:14px;letter-spacing:-.03em;}
+.kb-mini-guide-card span{display:block;font-size:12px;color:var(--kb-gray);line-height:1.45;margin-top:2px;word-break:keep-all;}
+@media(max-width:920px){.kb-hero{grid-template-columns:1fr;padding:38px 26px;}.kb-visual-card{min-height:auto;}.kb-mini-guide{grid-template-columns:1fr;}}
+@media(max-width:768px){.kb-page{padding:16px 12px 0;}.kb-topbar{align-items:flex-start;flex-direction:column;}.kb-action-row{width:100%;display:grid;grid-template-columns:1fr;}.kb-mini-btn{width:100%;text-align:center;}.kb-hero{padding:30px 18px;}.kb-hero-actions{display:grid;grid-template-columns:1fr;}.kb-btn{width:100%;}.kb-trust-row{grid-template-columns:1fr;}main#calculator{padding-top:20px !important;}.kb-section-title{align-items:flex-start;flex-direction:column;}.input{font-size:16px !important;}.sumcard .v{font-size:18px !important;}}
+
+
+/* === v3 requested refinements === */
+.kb-hero-title-bold,
+.kb-hero-title-bold strong{font-weight:950 !important;letter-spacing:-.055em;}
+.tab{height:38px !important;min-width:112px !important;flex:0 0 calc(25% - 8px) !important;padding:0 14px !important;font-size:13px !important;line-height:1.15 !important;}
+.mt-3.flex.flex-wrap.gap-2{gap:8px !important;align-items:center !important;}
+#tab_equip,#tab_route,#tab_cond,#tab_etc{margin-top:14px !important;}
+#tab_equip .grid,#tab_route .grid,#tab_cond .grid,#tab_etc .grid{gap:12px !important;}
+.opt{padding:14px !important;}
+.input:disabled,.btn:disabled{background:#f1f5f9 !important;color:#94a3b8 !important;border-color:#d7e1ec !important;box-shadow:none !important;cursor:not-allowed !important;transform:none !important;}
+#addrHint.is-locked{color:#b45309 !important;background:#fff7ed;border:1px solid #fed7aa;padding:8px 10px;}
+@media(max-width:768px){.tab{flex:1 1 calc(50% - 6px) !important;min-width:0 !important;height:40px !important;font-size:12.5px !important;padding:0 8px !important;}.mt-3.flex.flex-wrap.gap-2{gap:6px !important;}}
+
+
+/* === v6 compact select/input height tuning ===
+   요청사항: 기간, Type, 구간, 주소 검색, 시도/시군구/읍면동,
+   플렉시백/위험물질/활대품/중량물 선택 박스 높이 축소 */
+#periodSelect,
+#typeSelect,
+#portSelect,
+#addrQuery,
+#sidoSelect,
+#sigunguSelect,
+#dongSelect,
+#s_flexibag,
+#s_dg,
+#s_oversize_cm,
+#s_overweight_ton{
+  height:34px !important;
+  min-height:34px !important;
+  padding:6px 10px !important;
+  font-size:13px !important;
+  line-height:1.2 !important;
+}
+#addrSearchBtn{
+  height:34px !important;
+  min-height:34px !important;
+  padding:0 13px !important;
+  font-size:13px !important;
+  line-height:1 !important;
+}
+#periodSelect + .mt-2{
+  margin-top:6px !important;
+}
+#s_flexibag + .text-\[11px\],
+#s_oversize_cm + .text-\[11px\],
+#s_overweight_ton + .text-\[11px\]{
+  margin-top:5px !important;
+  line-height:1.35 !important;
+}
+@media(max-width:768px){
+  #periodSelect,
+  #typeSelect,
+  #portSelect,
+  #addrQuery,
+  #sidoSelect,
+  #sigunguSelect,
+  #dongSelect,
+  #s_flexibag,
+  #s_dg,
+  #s_oversize_cm,
+  #s_overweight_ton{
+    height:36px !important;
+    min-height:36px !important;
+    padding:7px 10px !important;
+    font-size:14px !important;
+  }
+  #addrSearchBtn{
+    height:36px !important;
+    min-height:36px !important;
+    padding:0 12px !important;
+    font-size:13px !important;
+  }
+}
+
 </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
-  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200">
-    <div class="wrap mx-auto px-4 h-16 flex items-center justify-center">
-      <h1 class="font-extrabold text-[14px] tracking-tight">KBridge 안전운임제 계산기</h1>
-    </div>
-  </header>
+<body class="kb-safe-calculator">
+  <div class="kb-page">
+    <header class="kb-topbar">
+      <a href="#calculator" class="kb-brand" aria-label="케이브릿지 안전운임 계산기">
+        <span class="kb-brand-mark">KB</span>
+        <span class="kb-brand-title">케이브릿지(주) 안전운임</span>
+      </a>
+      <div class="kb-action-row">
+        <a class="kb-mini-btn primary" href="#calculator">계산기 바로가기</a>
+      </div>
+    </header>
 
-  <main class="wrap mx-auto px-4 py-4 sm:py-6 grid lg:grid-cols-3 gap-6">
-    <section class="lg:col-span-2 card p-4 sm:p-6">
+    <section class="kb-hero" id="top">
+      <div>
+        <div class="kb-eyebrow">🚛 2026 안전운임 계산 지원</div>
+        <h1 class="kb-hero-title-bold"><strong>컨테이너 운송 안전운임,<br />구간·행선지·할증까지 한 번에 확인하세요.</strong></h1>
+        <p class="kb-hero-copy">
+          케이브릿지 안전운임제 계산기는 내장된 안전운임 데이터와 주소 검색, 컨테이너 타입, 각종 부대 할증 조건을 바탕으로 참고 운임을 빠르게 확인할 수 있도록 구성했습니다.
+        </p>
+        <div class="kb-hero-actions">
+          <a href="#calculator" class="btn btn-primary kb-btn primary">안전운임 계산하기</a>
+          <a href="#safe-guide" class="btn kb-btn">적용 기준 보기</a>
+        </div>
+        <div class="kb-trust-row">
+          <div class="kb-trust-card"><strong>Rate Data</strong><span>안전운임 데이터 내장</span></div>
+          <div class="kb-trust-card"><strong>Surcharge</strong><span>할증 조건 자동 반영</span></div>
+          <div class="kb-trust-card"><strong>Certificate</strong><span>확인서 다운로드 연결</span></div>
+        </div>
+      </div>
+
+      <aside class="kb-visual-card" aria-label="안전운임 계산 요약">
+        <div class="kb-route-box">
+          <div class="kb-route-item"><div class="kb-icon">📍</div><div><strong>구간·행선지 선택</strong><span>항만 기점과 도착 행정구역을 선택해 기본 운임을 확인합니다.</span></div></div>
+          <div class="kb-route-item"><div class="kb-icon">🚚</div><div><strong>20FT / 40FT 결과</strong><span>컨테이너 타입별 계산 결과를 결과 패널에서 즉시 확인합니다.</span></div></div>
+          <div class="kb-route-item"><div class="kb-icon">⚙️</div><div><strong>부대 할증 반영</strong><span>냉동, 위험물, 험로, 심야, 공휴일 등 조건을 선택할 수 있습니다.</span></div></div>
+          <div class="kb-route-item"><div class="kb-icon">📄</div><div><strong>실무 확인서 링크</strong><span>험로·오지, 대기시간, 세척, 손상 컨테이너 확인서로 연결됩니다.</span></div></div>
+        </div>
+      </aside>
+    </section>
+  </div>
+
+<main id="calculator" class="wrap mx-auto px-4 py-4 sm:py-6 grid lg:grid-cols-3 gap-6">
+        <section class="lg:col-span-2 card p-4 sm:p-6">
+      <div class="kb-section-title">
+        <div>
+          <h2>안전운임 계산 조건 입력</h2>
+          <p>기간, Type, 구간, 행선지를 선택한 뒤 필요한 할증 조건을 적용하세요.</p>
+        </div>
+      </div>
+      <div class="kb-mini-guide" aria-label="계산기 핵심 기능">
+        <div class="kb-mini-guide-card"><i>①</i><div><strong>기본 운임 선택</strong><span>기간·Type·항만 구간을 기준으로 운임 데이터를 불러옵니다.</span></div></div>
+        <div class="kb-mini-guide-card"><i>②</i><div><strong>주소 검색</strong><span>행정동 또는 법정동 기준으로 행선지를 빠르게 찾습니다.</span></div></div>
+        <div class="kb-mini-guide-card"><i>③</i><div><strong>할증 적용</strong><span>장비, 노선, 운행조건, 기타 비용을 선택해 결과에 반영합니다.</span></div></div>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <div class="label">기간</div>
@@ -213,8 +435,8 @@
                 <div class="mt-3">
           <div class="label">주소 검색</div>
           <div class="flex flex-col sm:flex-row gap-2">
-            <input id="addrQuery" class="input flex-1" placeholder="도로명·지번으로 쉽고 빠르게 찾으세요." autocomplete="off" />
-            <button id="addrSearchBtn" type="button" class="btn btn-ghost h-11 px-4 w-full sm:w-auto">검색</button>
+            <input id="addrQuery" class="input flex-1" placeholder="구간을 먼저 선택한 후 주소를 검색하세요." autocomplete="off" disabled />
+            <button id="addrSearchBtn" type="button" class="btn btn-ghost h-11 px-4 w-full sm:w-auto" disabled>검색</button>
           </div>
           <div id="addrHint" class="text-[12px] muted mt-2"></div>
 
@@ -230,15 +452,15 @@
 
         <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <div class="label">선택</div>
+            <div class="label">시·도</div>
             <select id="sidoSelect" class="input"></select>
           </div>
           <div>
-            <div class="label">선택</div>
+            <div class="label">시·군·구</div>
             <select id="sigunguSelect" class="input"></select>
           </div>
           <div>
-            <div class="label">선택</div>
+            <div class="label">읍·면·동</div>
             <select id="dongSelect" class="input"></select>
           </div>
         </div>
@@ -349,14 +571,32 @@
               </select>
             </div>
             <div class="opt">
-              <div class="label">중량물 초과(톤)</div>
-              <input id="s_overweight_ton" type="number" min="0" step="1" class="input" placeholder="예: 0" />
-              <div class="text-[11px] muted mt-1">1t↑ 10%, 2t↑ 20% … 9t↑ 90%</div>
+              <div class="label">활대품 할증</div>
+              <select id="s_oversize_cm" class="input">
+                <option value="0">해당 없음</option>
+                <option value="10">10cm 초과 10%</option>
+                <option value="20">20cm 초과 20%</option>
+                <option value="30">30cm 초과 30%</option>
+                <option value="40">40cm 초과 40%</option>
+                <option value="50">50cm 초과 50%</option>
+              </select>
+              <div class="text-[11px] muted mt-1">포워더케이알 방식처럼 초과 구간을 선택합니다.</div>
             </div>
             <div class="opt">
-              <div class="label">활대품 초과(cm)</div>
-              <input id="s_oversize_cm" type="number" min="0" step="10" class="input" placeholder="예: 0" />
-              <div class="text-[11px] muted mt-1">10cm↑ 10%, … 50cm↑ 50%</div>
+              <div class="label">중량물 할증</div>
+              <select id="s_overweight_ton" class="input">
+                <option value="0">해당 없음</option>
+                <option value="1">중량 1톤 초과 10%</option>
+                <option value="2">중량 2톤 초과 20%</option>
+                <option value="3">중량 3톤 초과 30%</option>
+                <option value="4">중량 4톤 초과 40%</option>
+                <option value="5">중량 5톤 초과 50%</option>
+                <option value="6">중량 6톤 초과 60%</option>
+                <option value="7">중량 7톤 초과 70%</option>
+                <option value="8">중량 8톤 초과 80%</option>
+                <option value="9">중량 9톤 초과 90%</option>
+              </select>
+              <div class="text-[11px] muted mt-1">포워더케이알 방식처럼 초과 톤수를 선택합니다.</div>
             </div>
           </div>
         </div>
@@ -366,7 +606,6 @@
       
       <div class="mt-4 card p-4">
         <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-          <a class="btn btn-ghost h-10 px-4 flex items-center font-bold" href="https://www.forwarder.kr/bbs/board.php?bo_table=safe" target="_blank" rel="noopener">안전운임 게시판</a>
           <div class="btn btn-ghost h-10 px-4 flex items-center font-bold">확인서 다운로드</div>
         </div>
         <div class="mt-3 flex flex-wrap gap-2">
@@ -378,7 +617,7 @@
         <div class="text-[11px] muted mt-2">* 참조 계산기와 동일하게 게시판 링크와 확인서 다운로드를 함께 제공합니다.</div>
       </div>
 
-<div class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 guideBox">
+<div id="safe-guide" class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 guideBox">
         <div class="text-[12px] font-bold guideTitle">안내사항</div>
         <ul class="mt-2 space-y-1 text-[12px] text-slate-600 leading-relaxed guideList">
           <li>• 할증금액은 할증료만 백원미만 사사오입 적용 후 합산, 거리(km)는 소수점 첫째자리 사사오입 적용됩니다.</li>
@@ -534,7 +773,31 @@
       el.classList.toggle('cursor-not-allowed', !enabled);
     }
 
+    function updateAddrSearchState(){
+      var hasPort = currentPortId() >= 0;
+      var input = $('addrQuery');
+      var btn = $('addrSearchBtn');
+      var hint = $('addrHint');
+      if(input){
+        input.disabled = !hasPort;
+        input.placeholder = hasPort ? '도로명·지번으로 쉽고 빠르게 찾으세요.' : '구간을 먼저 선택한 후 주소를 검색하세요.';
+        if(!hasPort) input.value = '';
+      }
+      if(btn) btn.disabled = !hasPort;
+      if(hint){
+        if(!hasPort){
+          hint.textContent = '구간을 먼저 선택해야 주소 검색을 사용할 수 있습니다.';
+          hint.classList.add('is-locked');
+        } else if(hint.classList.contains('is-locked')){
+          hint.textContent = '';
+          hint.classList.remove('is-locked');
+        }
+      }
+      if(!hasPort) closeAddrResults();
+    }
+
     function populateSido() {
+      updateAddrSearchState();
       var portId = currentPortId();
       var useBjd = $('useBjd').checked;
 
@@ -922,7 +1185,7 @@
         var jibun = it.jibunAddr || '';
         var si = it.siNm || '';
         var sgg = it.sggNm || '';
-        var emd = it.emdNm || '';
+        var emd = it.emdNm || extractDongFromAddress(it.roadAddr || it.roadAddrPart1 || it.jibunAddr || '');
         return '<button type="button" class="w-full text-left px-3 py-3 hover:bg-slate-50 focus:bg-slate-50 outline-none" data-idx="'+idx+'">'
           + '<div class="text-[13px] text-slate-900">'+escapeHtml(road)+'</div>'
           + (jibun ? '<div class="text-[12px] text-slate-500 mt-1">지번: '+escapeHtml(jibun)+'</div>' : '')
@@ -938,13 +1201,14 @@
           if(!it) return;
           var si = it.siNm || '';
           var sgg = it.sggNm || '';
-          var emd = it.emdNm || '';
-          // Forwarder처럼: 구간이 아직 없으면 대기 저장
-          PENDING_ADDR = { si: si, sgg: sgg, emd: emd };
+          var emd = it.emdNm || extractDongFromAddress(it.roadAddr || it.roadAddrPart1 || it.jibunAddr || '');
           if (currentPortId() < 0) {
-            $('addrHint').textContent = '구간을 먼저 선택하면, 검색한 주소를 자동으로 반영합니다.';
+            $('addrHint').textContent = '구간을 먼저 선택한 후 주소를 검색해주세요.';
+            $('addrHint').classList.add('is-locked');
+            closeAddrResults();
             return;
           }
+          PENDING_ADDR = { si: si, sgg: sgg, emd: emd };
           applyPendingAddr();
         });
       });
@@ -952,6 +1216,11 @@
 
     function closeAddrResults(){
       $('addrResultsWrap').classList.add('hidden');
+    }
+
+    function extractDongFromAddress(addr){
+      var m = String(addr||'').match(/([가-힣0-9]+(?:동|읍|면|가))/);
+      return m ? m[1] : '';
     }
 
     function normalizeK(s){
@@ -1064,6 +1333,10 @@
     }
 
     async function handleAddrSearch() {
+      if(currentPortId() < 0){
+        updateAddrSearchState();
+        return;
+      }
       var q = String($('addrQuery').value||'').trim();
       if(!q) {
         $('addrHint').textContent = '검색어를 입력해주세요.';
@@ -1105,7 +1378,7 @@
       el.addEventListener('change', function(){ render(); });
     });
 
-    $('portSelect').addEventListener('change', function(){ populateSido(); render(); });
+    $('portSelect').addEventListener('change', function(){ PENDING_ADDR = null; populateSido(); updateAddrSearchState(); render(); });
     $('useBjd').addEventListener('change', function(){ populateSido(); render(); });
     $('sidoSelect').addEventListener('change', function(){ populateSigungu(); render(); });
     $('sigunguSelect').addEventListener('change', function(){ populateDong(); render(); });
@@ -1224,6 +1497,7 @@
     }
     // init
     populateSido();
+    updateAddrSearchState();
     render();
   </script>
 </body>
